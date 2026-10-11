@@ -1,11 +1,28 @@
+/**
+ * Authentication request handlers for registering and signing in users.
+ *
+ * @module controllers/auth
+ */
 const userModel = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const emailService = require("../services/email.service")
 
 /**
- * Registers a new user and returns an authentication token.
+ * Registers a user, issues a JWT, and sends a registration email.
+ *
+ * Responds with 422 if the email is already registered. On success, creates
+ * the user, sets the JWT in a cookie, and returns the user details and token
+ * with a 201 response.
+ *
  * @param {import("express").Request<{}, any, { email: string, password: string, name: string }>} req
+ *   Express request containing the new user's email, password, and name.
  * @param {import("express").Response} res
- * @returns {Promise<import("express").Response>} The registration result.
+ *   Express response used to set the token cookie and send the registration
+ *   result.
+ * @returns {Promise<import("express").Response>}
+ *   Resolves with the duplicate-email or successful registration response.
+ * @throws {Error} If the user lookup, creation, JWT signing, or registration
+ *   email operation fails.
  */
 async function userRegisterController(req, res) {
   const { email, password, name } = req.body;
@@ -40,13 +57,25 @@ async function userRegisterController(req, res) {
     },
     token,
   });
+
+  await emailService.sendRegisterationEmail(user.email, user.name)
 }
 
 /**
- * Handles a user login request.
- * @param {import("express").Request} req
+ * Authenticates a user, sets an authentication cookie, and returns a JWT.
+ *
+ * Responds with 401 if the email is unknown or the password is incorrect.
+ * Otherwise, issues a three-day JWT, sets it in a cookie, and responds with
+ * the authenticated user's public details.
+ *
+ * @param {import("express").Request<{}, any, { email: string, password: string }>} req
+ *   Express request containing the user's email and password.
  * @param {import("express").Response} res
- * @returns {Promise<void>}
+ *   Express response used to set the token cookie and send the result.
+ * @returns {Promise<import("express").Response>}
+ *   Resolves with the failed-authentication or successful-login response.
+ * @throws {Error} If the user lookup, password comparison, or JWT signing
+ *   fails.
  */
 async function userLoginController(req, res) {
   const { email, password } = req.body;
