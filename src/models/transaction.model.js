@@ -5,13 +5,13 @@ const transactionSchema = new mongoose.Schema(
     fromAccount: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "account",
-      required: [true, "Transaction muse be associated with a from account"],
+      required: [true, "Transaction must be associated with a from account"],
       index: true,
     },
     toAccount: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "account",
-      required: [true, "Transaction muse be associated with a from account"],
+      required: [true, "Transaction must be associated with a from account"],
       index: true,
     },
     status: {
@@ -24,8 +24,8 @@ const transactionSchema = new mongoose.Schema(
     },
     amount: {
       type: Number,
-      requireD: [true, "Amount is required for creating a transaction"],
-      min: [0, "Transaction amount cannot be negative"],
+      required: [true, "Amount is required for creating a transaction"],
+      min: [0.01, "Transaction amount must be greater than zero"],
     },
     idempotencyKey: {
       type: String,
@@ -42,6 +42,6 @@ const transactionSchema = new mongoose.Schema(
   },
 );
 
-const transactionModel = mongoose.mode("transaction", transactionSchema);
+const transactionModel = mongoose.model("transaction", transactionSchema);
 
 module.exports = transactionModel;

@@ -7,9 +7,11 @@ const {
 const router = express.Router();
 
 /**
- * Registers account API endpoints on the Express router.
+ * POST /api/accounts
  *
- * POST /api/accounts creates an account for the authenticated user.
+ * Creates an account for the authenticated user. The account is associated
+ * with the current user and uses the schema defaults for its initial status
+ * and currency. No request body is required.
  */
 router.post("/", authMiddleware, createAccountController);
 

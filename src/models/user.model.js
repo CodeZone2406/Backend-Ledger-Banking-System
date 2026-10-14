@@ -24,6 +24,12 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "password should contain more than 6 characters"],
       select: false,
     },
+    systemUser: {
+      type: Boolean,
+      default: false,
+      immutable: true,
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -37,7 +43,7 @@ userSchema.pre("save", async function () {
 
   const hash = await bcrypt.hash(this.password, 10);
   this.password = hash;
-  return
+  return;
 });
 
 userSchema.methods.comparePassword = async function (password) {

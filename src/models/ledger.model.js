@@ -8,7 +8,7 @@ const ledgerSchema = new mongoose.Schema({
     index: true,
     immutable: true,
   },
-  ammount: {
+  amount: {
     type: Number,
     required: [true, "Amount is required for creating a ledger entry"],
     immutable: true,
@@ -47,6 +47,6 @@ ledgerSchema.pre("findOneAndDelete", preventLedgerModification);
 ledgerSchema.pre("findOneAndRemove", preventLedgerModification);
 ledgerSchema.pre("findOneAndReplace", preventLedgerModification);
 
-const ledgerModel = mongoose.mode("ledger", ledgerSchema);
+const ledgerModel = mongoose.model("ledger", ledgerSchema);
 
 module.exports = ledgerModel;
