@@ -115,7 +115,7 @@ async function sendTransactionEmail(userEmail, name, amount, toAccount) {
  */
 async function sendTransactionFailureEmail(userEmail, name, amount, toAccount) {
   const subject = "Transaction Failed";
-  const text = `Hello ${name},\n\nYour transaction of $${amount} to account ${toAccount} could not be completed. Please review your account details and balance, then try again. If the issue continues, contact our support team.\n\nBest regards,\nThe Backend Ledger Team`;
+  const text = `Hello ${name},\n\nYour transaction of ₹${amount} to account ${toAccount} could not be completed. Please review your account details and balance, then try again. If the issue continues, contact our support team.\n\nBest regards,\nThe Backend Ledger Team`;
   const html = `
     <p>Hello ${name},</p>
     <p>Your transaction of $${amount} to account ${toAccount} could not be completed.</p>
