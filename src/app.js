@@ -16,6 +16,17 @@ app.use(morgan("dev"));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /**
+ * Returns a simple liveness response for hosting platforms and root requests.
+ */
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    health: "/health",
+    docs: "/api-docs",
+  });
+});
+
+/**
  * API routers for authentication, account management, and transactions.
  */
 const authRouter = require("./routes/auth.routes");
