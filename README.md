@@ -7,3 +7,6 @@ Start the server with `npm run dev` or `npm start`, then open
 `http://localhost:3000/api-docs` for the interactive Swagger UI. It documents
 the authentication, account, and transaction endpoints. Protected endpoints
 use the `token` cookie set by registration and login.
+
+The public `GET /health` endpoint returns `200` when MongoDB is connected and
+`503` when the database is unavailable.

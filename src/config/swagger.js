@@ -116,6 +116,22 @@ const options = {
             transaction: { $ref: "#/components/schemas/Transaction" },
           },
         },
+        HealthResponse: {
+          type: "object",
+          properties: {
+            status: {
+              type: "string",
+              enum: ["healthy", "unhealthy"],
+              example: "healthy",
+            },
+            database: {
+              type: "string",
+              enum: ["connected", "unavailable"],
+              example: "connected",
+            },
+          },
+          required: ["status", "database"],
+        },
       },
     },
   },
