@@ -8,14 +8,24 @@ const mongoose = require("mongoose");
  * Creates a transfer from the requested source account to the destination.
  *
  * The request body must include `fromAccount`, `toAccount`, `amount`, and
- * `idempotencyKey`. The sender must have enough ledger-derived balance, and
- * both accounts must be active. A successful transfer creates a transaction
- * and corresponding debit and credit ledger entries, then sends a notification
- * to the authenticated user.
+ * `idempotencyKey`; each value is checked for presence. Both account records
+ * must exist and be active, and the source account must have enough
+ * ledger-derived balance. Existing idempotency keys return a response based
+ * on the transaction's `COMPLETED`, `PENDING`, `FAILED`, or `REVERSED` status.
+ * A new transfer creates a pending transaction and debit and credit ledger
+ * entries in a database transaction, marks the transaction completed, and
+ * sends a notification to the authenticated user after committing. Processing
+ * pauses for 15 seconds between creating the debit and credit entries.
+ *
+ * Account lookup checks that the account IDs exist but does not verify that
+ * either account belongs to the authenticated user. Transaction-processing
+ * errors are returned as a 400 response; notification errors occur after the
+ * database transaction has committed and are not caught here.
  *
  * @param {import("express").Request} req Authenticated request with transfer details in `body`.
  * @param {import("express").Response} res Express response.
  * @returns {Promise<import("express").Response|void>} The transfer result or an error response.
+ * @throws {Error} If account lookup, balance retrieval, or notification sending fails.
  */
 async function createTransaction(req, res) {
   /**
@@ -204,12 +214,18 @@ async function createTransaction(req, res) {
  * account to the destination account.
  *
  * The request body must include `toAccount`, `amount`, and `idempotencyKey`.
- * The destination account must exist. The system user must have an associated
- * source account.
+ * Each value is checked for presence. The destination account and an account
+ * associated with the authenticated system user must exist. The idempotency
+ * key is stored with the transaction but is not checked for prior use.
+ * The transaction creates debit and credit ledger entries and marks the
+ * transaction completed in a database transaction. Unlike
+ * `createTransaction`, this handler does not check account status or verify
+ * that the source account has sufficient balance.
  *
  * @param {import("express").Request} req Authenticated system-user request with funding details in `body`.
  * @param {import("express").Response} res Express response.
  * @returns {Promise<import("express").Response>} The initial-funds transaction result or an error response.
+ * @throws {Error} If account lookup, transaction creation, ledger writes, or database transaction operations fail.
  */
 async function createInitialFundsTransaction(req, res) {
   const { toAccount, amount, idempotencyKey } = req.body;

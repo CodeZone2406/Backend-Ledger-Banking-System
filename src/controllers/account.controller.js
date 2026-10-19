@@ -28,7 +28,16 @@ async function createAccountController(req, res) {
 }
 
 /**
+ * Fetches all accounts belonging to the authenticated user.
  *
+ * Responds with 200 and the matching accounts.
+ *
+ * @param {import("express").Request} req
+ *   Express request with the authenticated user attached by the auth middleware.
+ * @param {import("express").Response} res
+ *   Express response used to return the accounts.
+ * @returns {Promise<void>} Resolves after sending the account list response.
+ * @throws {Error} If fetching the user's accounts fails.
  */
 async function getUserAccountsController(req, res) {
   const accounts = await accountModel.find({ user: req.user._id });
@@ -40,6 +49,19 @@ async function getUserAccountsController(req, res) {
   });
 }
 
+/**
+ * Fetches the balance of an account owned by the authenticated user.
+ *
+ * Responds with 404 if the account is not found, or 200 with its balance.
+ *
+ * @param {import("express").Request<{ accountId: string }>} req
+ *   Express request containing the account ID and authenticated user.
+ * @param {import("express").Response} res
+ *   Express response used to return the account balance or not-found error.
+ * @returns {Promise<void | import("express").Response>}
+ *   Resolves after sending the response.
+ * @throws {Error} If looking up the account or calculating its balance fails.
+ */
 async function getAccountBalanceController(req, res) {
   const { accountId } = req.params;
 

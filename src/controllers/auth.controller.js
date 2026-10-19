@@ -20,8 +20,9 @@ const tokenBlackListModel = require("../models/blackList.model")
  * @param {import("express").Response} res
  *   Express response used to set the token cookie and send the registration
  *   result.
- * @returns {Promise<import("express").Response>}
- *   Resolves with the duplicate-email or successful registration response.
+ * @returns {Promise<void | import("express").Response>}
+ *   Resolves after sending the registration response, or with the duplicate-
+ *   email response.
  * @throws {Error} If the user lookup, creation, JWT signing, or registration
  *   email operation fails.
  */
@@ -73,8 +74,9 @@ async function userRegisterController(req, res) {
  *   Express request containing the user's email and password.
  * @param {import("express").Response} res
  *   Express response used to set the token cookie and send the result.
- * @returns {Promise<import("express").Response>}
- *   Resolves with the failed-authentication or successful-login response.
+ * @returns {Promise<void | import("express").Response>}
+ *   Resolves after sending the login response, or with the failed-
+ *   authentication response.
  * @throws {Error} If the user lookup, password comparison, or JWT signing
  *   fails.
  */
@@ -117,9 +119,19 @@ async function userLoginController(req, res) {
 }
 
 /**
- * - User Logout Controller
- * @param {*} req
- * @param {*} res
+ * Logs out the current user by blacklisting their token and clearing its cookie.
+ *
+ * Reads the token from the `token` cookie or the `Authorization` header.
+ * Responds with 400 if no token is present; otherwise, stores the token in the
+ * blacklist, clears the cookie, and responds with 200.
+ *
+ * @param {import("express").Request} req
+ *   Express request containing the token cookie or authorization header.
+ * @param {import("express").Response} res
+ *   Express response used to clear the token cookie and send the result.
+ * @returns {Promise<import("express").Response>}
+ *   Resolves with the already-logged-out or successful logout response.
+ * @throws {Error} If storing the token in the blacklist fails.
  */
 async function userLogoutController(req, res) {
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];

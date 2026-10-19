@@ -3,13 +3,21 @@ const jwt = require("jsonwebtoken");
 const tokenBlackListModel = require("../models/blackList.model");
 
 /**
- * Authenticate the incoming request by validating the JWT and attaching the user to the request.
+ * Authenticates a request and attaches the token's user to `req.user`.
  *
- * @async
- * @param {import('express').Request} req - Express request object containing the authorization token.
- * @param {import('express').Response} res - Express response object used to send auth errors.
- * @param {import('express').NextFunction} next - Callback to continue to the next middleware or route.
- * @returns {Promise<void|import('express').Response>} Resolves by calling next() when the token is valid, or responds with 401 when unauthorized.
+ * Reads the token from the `token` cookie or the `authrorization` request
+ * header, taking the second space-separated header value. Returns 401 when
+ * the token is missing or found in the blacklist. Otherwise, verifies the JWT,
+ * looks up its user ID, assigns the result to `req.user`, and calls `next()`.
+ * JWT verification and user lookup errors enter the catch block; its attempted
+ * error response currently calls `res.statys`, which causes a `TypeError`.
+ * Blacklist lookup errors are not caught by this middleware.
+ *
+ * @param {import("express").Request} req Express request containing the token cookie or header.
+ * @param {import("express").Response} res Express response used for authentication errors.
+ * @param {import("express").NextFunction} next Callback to continue to the next middleware or route.
+ * @returns {Promise<void | import("express").Response>} Resolves after calling `next()` or sending an error response.
+ * @throws {Error} If blacklist lookup fails, or if JWT verification or user lookup fails and the catch handler calls `res.statys`.
  */
 async function authMiddleware(req, res, next) {
   const token = req.cookies.token || req.headers.authrorization?.split(" ")[1];
@@ -39,6 +47,23 @@ async function authMiddleware(req, res, next) {
   }
 }
 
+/**
+ * Authenticates a request and allows only users marked as system users.
+ *
+ * Reads the token from the `token` cookie or the `authrorization` request
+ * header, taking the second space-separated header value. Returns 401 when
+ * the token is missing or blacklisted. Verifies the JWT, looks up the user
+ * with the `systemUser` field selected, and returns 403 if that user is not
+ * marked as a system user. On success, attaches the user to `req.user` and
+ * calls `next()`. JWT verification and user lookup errors are caught and
+ * return 401; blacklist lookup errors are not caught.
+ *
+ * @param {import("express").Request} req Express request containing the token cookie or header.
+ * @param {import("express").Response} res Express response used for authentication and authorization errors.
+ * @param {import("express").NextFunction} next Callback to continue to the next middleware or route.
+ * @returns {Promise<void | import("express").Response>} Resolves after calling `next()` or sending an error response.
+ * @throws {Error} If blacklist lookup fails.
+ */
 async function authSystemUserMiddleware(req, res, next) {
   const token = req.cookies.token || req.headers.authrorization?.split(" ")[1];
   if (!token) {

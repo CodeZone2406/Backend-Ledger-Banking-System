@@ -4,6 +4,10 @@ const morgan = require("morgan");
 
 const app = express();
 
+/**
+ * Configures request middleware to parse JSON bodies and cookies, and to log
+ * HTTP requests using Morgan's development format.
+ */
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -17,7 +21,7 @@ const transactionRouter = require("./routes/transaction.routes");
 
 /**
  * Mounts each API router under its corresponding URL prefix:
- * - `/api/auth` for registration and login
+ * - `/api/auth` for registration, login, and logout
  * - `/api/accounts` for account management
  * - `/api/transactions` for account transfers and initial funding
  */
